@@ -11,6 +11,12 @@
  * @method   getDetails
  */
 
+function Spell(name, cost, description){
+    this.name = name;
+    this.cost = cost;
+    this.description = description;
+}
+
   /**
    * Returns a string of all of the spell's details.
    * The format doesn't matter, as long as it contains the spell name, cost, and description.
@@ -18,7 +24,9 @@
    * @name getDetails
    * @return {string} details containing all of the spells information.
    */
-
+Spell.prototype.getDetails = function(){
+        return this.name + " " + this.cost + " " + this.description;
+};
 /**
  * A spell that deals damage.
  * We want to keep this code DRY (Don't Repeat Yourself).
@@ -43,6 +51,12 @@
  * @property {number} damage
  * @property {string} description
  */
+function DamageSpell(name, cost, damage, description){
+    Spell.call(this, name, cost, description);
+    this.damage = damage;
+}
+DamageSpell.prototype = Object.create(Spell.prototype);
+
 
 /**
  * Now that you've created some spells, let's create
@@ -60,6 +74,43 @@
  * @method  spendMana
  * @method  invoke
  */
+
+ function Spellcaster(name, health, mana){
+     this.name = name;
+     this.health = health;
+     this.mana = mana;
+     this.isAlive = true;
+
+     this.inflictDamage = function(damage){
+         this.health -= damage;
+         if(this.health <= 0){
+             this.isAlive = false;
+             this.health = 0;
+         }
+     }
+     this.spendMana = function(cost){
+        if(this.mana >= cost){
+            this.mana -= cost;
+            return true;
+        }else{
+            return false;
+        }
+    }
+    this.invoke = function(spell, target){
+
+        if(spell instanceof DamageSpell && target instanceof Spellcaster && this.mana >= spell.cost){
+            this.inflictDamage.call(target, spell.damage);
+            this.spendMana(spell.cost);
+            return true;
+        }else if (spell instanceof Spell && !(spell instanceof DamageSpell) && this.mana >= spell.cost){
+            this.spendMana(spell.cost);
+            return true;
+        }else{
+            return false;
+        }
+    } 
+}
+
 
   /**
    * @method inflictDamage
